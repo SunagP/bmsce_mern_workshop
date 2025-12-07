@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla JS Counter - Page Reloads!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .counter-display {
+            font-size: 5em;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 30px 0;
+            animation: pulse 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        button:hover {
+            background: #ee5a6f;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .reload-indicator {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .reload-indicator h3 {
+            color: #721c24;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .indicator-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .indicator-label {
+            color: #666;
+            font-weight: bold;
+        }
+
+        .indicator-value {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .blink {
+            animation: blinkAnimation 0.5s ease;
+        }
+
+        @keyframes blinkAnimation {
+            0%, 100% { background: white; }
+            50% { background: #ffeb3b; }
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 5px solid #2196F3;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1>😩 Vanilla JS Counter</h1>
+        <p class="subtitle">Watch the page reload indicators!</p>
+
+        <div class="warning">
+            ⚠️ Every click reloads EVERYTHING!
+        </div>
+
+        <div class="counter-display" id="counterDisplay">0</div>
+
+        <button id="incrementBtn">Click Me!</button>
+
+        <div class="reload-indicator">
+            <h3>🔄 Page Reload Indicators</h3>
+            
+            <div class="indicator-item" id="timestampIndicator">
+                <span class="indicator-label">Last Reload Time:</span>
+                <span class="indicator-value" id="timestamp">--:--:--</span>
+            </div>
+
+            <div class="indicator-item" id="reloadCountIndicator">
+                <span class="indicator-label">Total Page Reloads:</span>
+                <span class="indicator-value" id="reloadCount">0</span>
+            </div>
+
+            <div class="indicator-item" id="randomIndicator">
+                <span class="indicator-label">Random Number (changes on reload):</span>
+                <span class="indicator-value" id="randomNum">0</span>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>💡 What's Happening?</h4>
+            <ul>
+                <li><strong>Every click</strong> reloads the entire page</li>
+                <li><strong>All JavaScript runs again</strong> from scratch</li>
+                <li><strong>State is lost</strong> (we save it in URL/localStorage)</li>
+                <li><strong>Slow and inefficient</strong> for complex apps</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Get current counter from URL (since page reloads)
+        const urlParams = new URLSearchParams(window.location.search);
+        let counter = parseInt(urlParams.get('count')) || 0;
+
+        // Track total reloads in localStorage
+        let reloadCount = parseInt(localStorage.getItem('reloadCount')) || 0;
+        reloadCount++;
+        localStorage.setItem('reloadCount', reloadCount);
+
+        // Update display
+        document.getElementById('counterDisplay').textContent = counter;
+        document.getElementById('reloadCount').textContent = reloadCount;
+
+        // Show current time (proves page reloaded)
+        const now = new Date();
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0') + ':' + 
+                          now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('timestamp').textContent = timeString;
+
+        // Random number (changes on every reload)
+        const randomNum = Math.floor(Math.random() * 1000);
+        document.getElementById('randomNum').textContent = randomNum;
+
+        // Blink indicators to show reload happened
+        const indicators = document.querySelectorAll('.indicator-item');
+        indicators.forEach(indicator => {
+            indicator.classList.add('blink');
+        });
+
+        // Button click - RELOADS THE ENTIRE PAGE!
+        document.getElementById('incrementBtn').addEventListener('click', () => {
+            // Increment counter and reload page with new value
+            counter++;
+            window.location.href = `?count=${counter}`;  // ← THIS RELOADS THE PAGE!
+        });
+
+        // Show console message
+        console.log('🔄 Page loaded/reloaded at:', timeString);
+        console.log('📊 Counter value:', counter);
+        console.log('🔢 Random number:', randomNum);
+    </script>
+
+</body>
+</html>

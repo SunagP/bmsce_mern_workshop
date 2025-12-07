@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Counter - No Reload!</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .counter-display {
+            font-size: 5em;
+            font-weight: bold;
+            color: #4facfe;
+            margin: 30px 0;
+            transition: transform 0.2s ease;
+        }
+
+        .counter-display.bump {
+            transform: scale(1.2);
+        }
+
+        button {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        button:hover {
+            background: #3a9ae0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .reload-indicator {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .reload-indicator h3 {
+            color: #0c5460;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .indicator-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .indicator-label {
+            color: #666;
+            font-weight: bold;
+        }
+
+        .indicator-value {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .stable {
+            background: #28a745 !important;
+        }
+
+        .explanation {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .explanation h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            line-height: 2;
+        }
+
+        .click-counter {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function CounterApp() {
+            const [counter, setCounter] = useState(0);
+            const [clicks, setClicks] = useState(0);
+            const [timestamp] = useState(new Date());
+            const [randomNum] = useState(Math.floor(Math.random() * 1000));
+            const [bump, setBump] = useState(false);
+
+            // Track total clicks
+            const handleClick = () => {
+                setCounter(counter + 1);
+                setClicks(clicks + 1);
+                
+                // Visual bump animation
+                setBump(true);
+                setTimeout(() => setBump(false), 200);
+            };
+
+            // Format time
+            const timeString = timestamp.getHours().toString().padStart(2, '0') + ':' + 
+                              timestamp.getMinutes().toString().padStart(2, '0') + ':' + 
+                              timestamp.getSeconds().toString().padStart(2, '0');
+
+            // Log to console on first render only
+            useEffect(() => {
+                console.log('✅ React app mounted at:', timeString);
+                console.log('🎯 Counter value:', counter);
+                console.log('🔢 Random number (stays the same!):', randomNum);
+            }, []); // Empty array = runs only once!
+
+            return (
+                <div className="container">
+                    <h1>✨ React Counter</h1>
+                    <p className="subtitle">Watch how NOTHING reloads!</p>
+
+                    <div className="success">
+                        ✅ No page reload - only counter updates!
+                    </div>
+
+                    <div className={`counter-display ${bump ? 'bump' : ''}`}>
+                        {counter}
+                    </div>
+
+                    <button onClick={handleClick}>Click Me!</button>
+
+                    <div className="reload-indicator">
+                        <h3>🎯 No Reload Proof</h3>
+                        
+                        <div className="indicator-item">
+                            <span className="indicator-label">App Loaded At:</span>
+                            <span className="indicator-value stable">{timeString}</span>
+                        </div>
+
+                        <div className="indicator-item">
+                            <span className="indicator-label">Random Number (never changes):</span>
+                            <span className="indicator-value stable">{randomNum}</span>
+                        </div>
+
+                        <div className="indicator-item">
+                            <span className="indicator-label">Times Clicked:</span>
+                            <span className="indicator-value">{clicks}</span>
+                        </div>
+                    </div>
+
+                    <div className="explanation">
+                        <h4>💡 What's Happening?</h4>
+                        <ul>
+                            <li><strong>No page reload</strong> - React updates only what changed</li>
+                            <li><strong>State persists</strong> - timestamp and random number stay the same</li>
+                            <li><strong>Fast and efficient</strong> - only counter div updates</li>
+                            <li><strong>Better UX</strong> - smooth, instant updates</li>
+                        </ul>
+                    </div>
+
+                    <div className="click-counter">
+                        🖱️ You clicked the button <strong>{clicks}</strong> times without a single page reload!
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CounterApp />, document.getElementById('root'));
+    </script>
+
+</body>
+</html>
