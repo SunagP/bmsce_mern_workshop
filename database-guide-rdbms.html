@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RDBMS vs NoSQL — Simple Explanation & Examples (MongoDB)</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#071229 0%, #071a2d 60%);color:#e6eef6}
+    .wrap{max-width:1100px;margin:28px auto;padding:28px}
+    header{display:flex;gap:20px;align-items:center}
+    h1{margin:0;font-size:26px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.02)}
+    pre{background:var(--glass);padding:12px;border-radius:8px;overflow:auto;color:#dff;}
+    table.demo{width:100%;border-collapse:collapse;font-size:13px}
+    table.demo th, table.demo td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#60a5fa);color:#012;cursor:pointer;font-weight:600;border:none}
+    .muted{color:var(--muted)}
+    .compare{display:flex;flex-direction:column;gap:12px}
+    .row{display:flex;gap:12px}
+    .pill{background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:999px;font-size:13px}
+    .example-toggle{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .label{font-size:13px;color:var(--muted)}
+    .side{position:sticky;top:28px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    code.inline{background:rgba(255,255,255,0.03);padding:2px 6px;border-radius:6px}
+    .highlight{background:linear-gradient(90deg,rgba(125,211,252,0.08),rgba(96,165,250,0.04));padding:10px;border-radius:8px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .diff-table{width:100%;border-collapse:collapse}
+    .diff-table th,.diff-table td{padding:8px;border:1px solid rgba(255,255,255,0.03);}
+    .small{font-size:13px;color:var(--muted)}
+    .example-area{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:12px;border-radius:8px}
+    .notice{background:#052b2b;color:#bff7ef;padding:8px;border-radius:8px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .kbd{background:rgba(0,0,0,0.3);padding:3px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.03)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>RDBMS vs NoSQL — Simple explanation with examples</h1>
+        <p class="lead">Quick, practical overview showing how relational tables become redundant with multi-valued data and how a document DB like MongoDB solves that.</p>
+      </div>
+      <div style="margin-left:auto" class="pill">Sunag — Teaching-friendly</div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>What is RDBMS (Relational Database Management System)?</h2>
+        <p class="small">RDBMS stores data in tables with rows and columns. Tables enforce schema (column types), and relationships between tables are expressed using keys (primary / foreign).</p>
+
+        <h3>Typical example: Customers and Orders</h3>
+        <div class="example-area">
+          <p class="small">One simple (denormalized) table for orders:</p>
+          <table class="demo" id="orders-table">
+            <thead>
+              <tr><th>order_id</th><th>customer_id</th><th>customer_name</th><th>customer_phone</th><th>product</th><th>qty</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1001</td><td>1</td><td>Alice</td><td>+91-98765-11111</td><td>Keyboard</td><td>1</td></tr>
+              <tr><td>1002</td><td>1</td><td>Alice</td><td>+91-98765-11111</td><td>Mouse</td><td>2</td></tr>
+              <tr><td>1003</td><td>2</td><td>Bob</td><td>+91-88888-22222</td><td>Monitor</td><td>1</td></tr>
+            </tbody>
+          </table>
+
+          <p class="small muted">Notice how customer info is repeated for each order — this is redundancy.</p>
+        </div>
+
+        <h3>Why redundancy is a problem</h3>
+        <ul class="small">
+          <li>Wastes storage when the same data (e.g., customer_name, phone) repeats.</li>
+          <li>Update anomalies — if Alice changes phone, you must update every row.</li>
+          <li>Insert / delete anomalies — impossible to store a customer without an order in some naive table designs.</li>
+        </ul>
+
+        <h3>Relational solution: Normalization</h3>
+        <p class="small">Split into <code class="inline">customers</code> and <code class="inline">orders</code> tables:</p>
+        <pre><strong>customers</strong>
+customer_id | customer_name | customer_phone
+1           | Alice         | +91-98765-11111
+2           | Bob           | +91-88888-22222
+
+<strong>orders</strong>
+order_id | customer_id | product  | qty
+1001     | 1           | Keyboard | 1
+1002     | 1           | Mouse    | 2
+1003     | 2           | Monitor  | 1
+        </pre>
+
+        <p class="small">Normalization reduces redundancy but increases the need for joins. Joins can be expensive at scale and complicate horizontal scaling.</p>
+
+        <hr />
+
+        <h2>NoSQL (document-oriented) — core idea</h2>
+        <p class="small">NoSQL covers multiple database types (key-value, document, wide-column, graph). We'll focus on document DBs (e.g., MongoDB) where data is stored as nested documents (JSON-like), enabling flexible schemas and embedding related data together.</p>
+
+        <h3>Same example in a document (MongoDB) form</h3>
+        <div class="example-area">
+          <p class="small">Store an order as a document and embed customer info or embed products list inside customer — depending on access patterns.</p>
+          <pre id="doc-example">{
+  _id: ObjectId("..."),
+  customer: {
+    id: 1,
+    name: "Alice",
+    phones: ["+91-98765-11111", "+91-99999-00000"]
+  },
+  items: [
+    { product: "Keyboard", qty: 1 },
+    { product: "Mouse", qty: 2 }
+  ],
+  order_date: "2025-12-01"
+}</pre>
+
+          <p class="small muted">Here, customer phones are an array — no extra table needed. Related data is stored together and read together (fast reads).</p>
+        </div>
+
+        <h3>Why NoSQL (document DB) can be better</h3>
+        <div class="compare small">
+          <div class="row"><div><strong>Flexible schema</strong><div class="muted">Fields can vary between documents — useful for evolving data.</div></div></div>
+          <div class="row"><div><strong>Denormalization for read-speed</strong><div class="muted">Embedding avoids joins and speeds up reads for common access patterns.</div></div></div>
+          <div class="row"><div><strong>Horizontal scaling</strong><div class="muted">Designed to shard data across many servers.</div></div></div>
+          <div class="row"><div><strong>Batteries for modern apps</strong><div class="muted">Great for analytics, content stores, logs, and product catalogs.</div></div></div>
+        </div>
+
+        <hr />
+
+        <h2>Concrete comparison (short)</h2>
+        <div class="grid-2">
+          <div class="card small">
+            <h4>RDBMS</h4>
+            <ul>
+              <li>Strong schema & ACID transactions</li>
+              <li>Best for complex relations and transactions</li>
+              <li>Joins & multi-table queries</li>
+              <li>Vertical scaling common</li>
+            </ul>
+          </div>
+          <div class="card small">
+            <h4>NoSQL (document)</h4>
+            <ul>
+              <li>Flexible / schema-less documents</li>
+              <li>Denormalize for performance</li>
+              <li>Designed for horizontal scaling</li>
+              <li>Eventual consistency patterns often used</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>When to prefer which?</h3>
+        <p class="small">Use RDBMS when you need complex transactions, strong consistency, and you have well-structured relational data (banking, ERP). Use NoSQL when you need fast reads, flexible schema, high write throughput, or when your data naturally fits into documents (user profiles, product catalogs, logs).</p>
+
+        <hr />
+        <h2>Intro to MongoDB (practical)</h2>
+        <p class="small">MongoDB is a popular document database. Data is stored in <code class="inline">collections</code> containing <code class="inline">documents</code> (BSON internally).</p>
+
+        <h4>Basic MongoDB shell / Node.js examples</h4>
+        <pre><strong>// Insert a document</strong>
+db.orders.insertOne({
+  customer: { id: 1, name: "Alice", phones:["+91-98765-11111"] },
+  items:[{product:"Keyboard",qty:1}],
+  order_date: new Date()
+})
+
+<strong>// Query documents</strong>
+db.orders.find({ "customer.id": 1 })
+
+<strong>// Update: add a phone</strong>
+db.customers.updateOne({id:1},{ $push: { phones: "+91-99999-00000" } })
+
+<strong>// Create an index for customer.id</strong>
+db.orders.createIndex({ "customer.id": 1 })
+</pre>
+
+        <p class="small muted">Indexes speed queries. Embedding is great for read-heavy access where related data is read together. Use references (like relational foreign keys) when you need to avoid duplication and maintain consistency across many documents.</p>
+
+        <hr />
+
+        <h3>Example: Handling multiple phone numbers</h3>
+        <p class="small">Relational approach requires a separate table <code class="inline">customer_phones(customer_id, phone)</code>. In NoSQL you store an array in the document.</p>
+        <pre><strong>Relational</strong>
+customers
+1 | Alice
+
+customer_phones
+1 | +91-98765-11111
+1 | +91-99999-00000
+
+<strong>MongoDB document</strong>
+{
+  id:1, name: "Alice", phones: ["+91-98765-11111","+91-99999-00000"]
+}
+</pre>
+
+        <p class="small">If your access pattern frequently needs both the customer and their phones together, the document model is simpler and faster.</p>
+
+        <hr />
+
+        <div class="center">
+          <button class="btn" id="toggle-view">Toggle: Show JSON ⇄ Show SQL table</button>
+        </div>
+
+      <!-- Interactive normalization demo: splits a denormalized table into two normalized tables -->
+      <section class="card" id="normalization-demo">
+        <h2>Interactive normalization demo</h2>
+        <p class="small">Paste a small CSV of orders (header present) or use the sample below, preview it, then click <strong>Normalize</strong> to split into <code class="inline">customers</code> and <code class="inline">orders</code> tables.</p>
+
+        <div class="example-area">
+          <textarea id="csv-input" style="width:100%;height:120px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;font-family:monospace">order_id,customer_id,customer_name,customer_phone,product,qty
+1001,1,Alice,+91-98765-11111,Keyboard,1
+1002,1,Alice,+91-98765-11111,Mouse,2
+1003,2,Bob,+91-88888-22222,Monitor,1
+1004,3,Charlie,+91-77777-33333,Keyboard,1
+1005,3,Charlie,+91-77777-33333,Mouse,1</textarea>
+
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="preview-csv">Preview Table</button>
+            <button class="btn" id="normalize-btn">Normalize</button>
+            <button class="btn" id="reset-sample">Reset Sample</button>
+          </div>
+
+          <div id="preview-area" style="margin-top:12px"></div>
+
+          <div id="normalized-area" style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+        </div>
+
+        <script>
+          function parseCSV(text){
+            const lines = text.split(/\r?\n/).filter(l=>l.trim());
+            if(lines.length<2) return {headers:[],rows:[]};
+            const headers = lines[0].split(',').map(h=>h.trim());
+            const rows = lines.slice(1).map(l=>{
+              const cols = l.split(',').map(c=>c.trim());
+              const obj = {};
+              headers.forEach((h,i)=>obj[h]=cols[i]||'');
+              return obj;
+            });
+            return {headers,rows};
+          }
+
+          function renderTableFromCSV(parsed){
+            if(parsed.rows.length===0) return '<div class="small muted">No rows</div>'
+            let html = '<table class="demo"><thead><tr>' + parsed.headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>' + parsed.rows.map(r=>'<tr>'+ parsed.headers.map(h=>`<td>${r[h]||''}</td>`).join('') +'</tr>').join('') + '</tbody></table>'
+            return html;
+          }
+
+          document.getElementById('preview-csv').addEventListener('click', ()=>{
+            const txt = document.getElementById('csv-input').value;
+            const parsed = parseCSV(txt);
+            document.getElementById('preview-area').innerHTML = '<h4 class="small">Preview</h4>' + renderTableFromCSV(parsed);
+            document.getElementById('normalized-area').innerHTML = '';
+          });
+
+          document.getElementById('reset-sample').addEventListener('click', ()=>{
+            document.getElementById('csv-input').value = `order_id,customer_id,customer_name,customer_phone,product,qty
+1001,1,Alice,+91-98765-11111,Keyboard,1
+1002,1,Alice,+91-98765-11111,Mouse,2
+1003,2,Bob,+91-88888-22222,Monitor,1
+1004,3,Charlie,+91-77777-33333,Keyboard,1
+1005,3,Charlie,+91-77777-33333,Mouse,1`;
+            document.getElementById('preview-csv').click();
+          });
+
+          document.getElementById('normalize-btn').addEventListener('click', ()=>{
+            const txt = document.getElementById('csv-input').value;
+            const parsed = parseCSV(txt);
+            if(parsed.rows.length===0){ alert('No rows to normalize'); return; }
+            // Build customers map and orders list
+            const customers = new Map();
+            const orders = []
+            parsed.rows.forEach(r=>{
+              const cid = r['customer_id']||r['customerId']||r['customer'];
+              if(!customers.has(cid)) {
+                customers.set(cid,{ customer_id: cid, customer_name: r['customer_name']||r['name']||'', customer_phone: r['customer_phone']||'' });
+              }
+              orders.push({ order_id: r['order_id'], customer_id: cid, product: r['product'], qty: r['qty'] });
+            });
+
+            // Render customers table
+            let custHtml = '<h4 class="small">customers</h4>' + '<table class="demo"><thead><tr><th>customer_id</th><th>customer_name</th><th>customer_phone</th></tr></thead><tbody>' + Array.from(customers.values()).map(c=>`<tr><td>${c.customer_id}</td><td>${c.customer_name}</td><td>${c.customer_phone}</td></tr>`).join('') + '</tbody></table>'
+            // Render orders table
+            let ordHtml = '<h4 class="small">orders</h4>' + '<table class="demo"><thead><tr><th>order_id</th><th>customer_id</th><th>product</th><th>qty</th></tr></thead><tbody>' + orders.map(o=>`<tr><td>${o.order_id}</td><td>${o.customer_id}</td><td>${o.product}</td><td>${o.qty}</td></tr>`).join('') + '</tbody></table>'
+
+            document.getElementById('normalized-area').innerHTML = '<div>' + custHtml + '</div><div>' + ordHtml + '</div>'
+            document.getElementById('preview-area').innerHTML = '<div class="small muted">Normalized into two tables (customers, orders). Notice customer info is no longer repeated in every order row.</div>'
+          });
+
+          // Initialize preview on load
+          document.getElementById('preview-csv').click();
+        </script>
+
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <h3>Quick cheatsheet</h3>
+          <div class="small">
+            <p><strong>SQL:</strong> Structured, ACID, JOINs, vertical scale.</p>
+            <p><strong>NoSQL:</strong> Flexible, denormalize, shard, eventual-consistency tradeoffs.</p>
+          </div>
+          <hr />
+          <h4>MongoDB basics</h4>
+          <ul class="small">
+            <li><code class="inline">db.collection.insertOne()</code></li>
+            <li><code class="inline">db.collection.find()</code></li>
+            <li><code class="inline">db.collection.updateOne()</code></li>
+            <li><code class="inline">createIndex()</code></li>
+          </ul>
+          <hr />
+          <div class="notice small">Tip: choose data models by access patterns — read-mostly? denormalize. Transaction-heavy? relational or use multi-document transactions in MongoDB (when needed).</div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Comparison table</h4>
+          <table class="diff-table small">
+            <tr><th>Aspect</th><th>RDBMS</th><th>NoSQL (Mongo)</th></tr>
+            <tr><td>Schema</td><td>Fixed/strict</td><td>Flexible / document</td></tr>
+            <tr><td>Joins</td><td>Built-in</td><td>Not native (embed or application join)</td></tr>
+            <tr><td>Transactions</td><td>ACID</td><td>Single-doc ACID, multi-doc transactions available</td></tr>
+            <tr><td>Scaling</td><td>Vertical, some distributed</td><td>Horizontal (sharding)</td></tr>
+            <tr><td>Good for</td><td>Financial systems, complex relations</td><td>Product catalogs, logs, user profiles</td></tr>
+          </table>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <p class="small">This page is a compact teaching aid — use the toggle button to see how data maps between relational rows and JSON documents. Want me to add an interactive normalization demo (split a table into two tables)? Click <span class="kbd">Request</span> below.</p>
+    </footer>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggle-view');
+    const ordersTable = document.getElementById('orders-table');
+    const docExample = document.getElementById('doc-example');
+    let isJson = false;
+
+    toggleBtn.addEventListener('click', ()=>{
+      isJson = !isJson;
+      if(isJson){
+        ordersTable.style.display = 'none';
+        docExample.style.display = 'block';
+        toggleBtn.textContent = 'Show SQL table ⇄ Show JSON';
+      } else {
+        ordersTable.style.display = 'table';
+        docExample.style.display = 'none';
+        toggleBtn.textContent = 'Toggle: Show JSON ⇄ Show SQL table';
+      }
+    });
+
+    // Start with JSON hidden
+    docExample.style.display = 'none';
+
+    // Small interactive example: click a row to highlight redundancy
+    document.querySelectorAll('#orders-table tbody tr').forEach(tr=>{
+      tr.addEventListener('click', ()=>{
+        document.querySelectorAll('#orders-table tbody tr').forEach(r=>r.style.background='');
+        tr.style.background = 'linear-gradient(90deg, rgba(125,211,252,0.08), rgba(96,165,250,0.04))';
+        alert('This row repeats customer info: updating the phone number would require updating every order row for that customer in a denormalized table.');
+      })
+    });
+  </script>
+</body>
+</html>

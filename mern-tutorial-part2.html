@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERN Tutorial - Part 2: Backend & MongoDB</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #11998e;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: #11998e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover {
+            background: #38ef7d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn.secondary {
+            background: #667eea;
+        }
+
+        .nav-btn.secondary:hover {
+            background: #764ba2;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 100px;
+            width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #11998e;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+        }
+
+        .sidebar li:hover {
+            border-left-color: #11998e;
+            padding-left: 15px;
+            color: #11998e;
+        }
+
+        .content {
+            margin-left: 290px;
+            margin-right: 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h2 {
+            color: #11998e;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #11998e;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #38ef7d;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .section h4 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #e53e3e;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #11998e;
+        }
+
+        pre code {
+            background: transparent;
+            color: #e2e8f0;
+            padding: 0;
+        }
+
+        .info-box {
+            background: #e6fffa;
+            border-left: 4px solid #11998e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .tip-box {
+            background: #fef5e7;
+            border-left: 4px solid #f6ad55;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #11998e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .example-card {
+            background: #f7fafc;
+            border: 2px solid #11998e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .example-card h4 {
+            color: #11998e;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .flow-diagram {
+            background: white;
+            border: 2px solid #11998e;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: #e6fffa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #11998e;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #11998e;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: relative;
+                left: 0;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .content {
+                margin-left: 0;
+            }
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #11998e;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .back-to-top:hover {
+            background: #38ef7d;
+            transform: translateY(-5px);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #11998e;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 MERN Stack Tutorial</h1>
+            <p class="subtitle">Part 2: Backend, Express, MongoDB & Complete Flow</p>
+            <div class="navigation">
+                <a href="mern-tutorial-part1.html" class="nav-btn secondary">← Back to Part 1</a>
+                <button class="nav-btn" onclick="showSection('server')">🖥️ Server Setup</button>
+                <button class="nav-btn" onclick="showSection('mongodb')">🍃 MongoDB</button>
+                <button class="nav-btn" onclick="showSection('routes')">🛣️ API Routes</button>
+                <button class="nav-btn" onclick="showSection('flow')">🔄 Data Flow</button>
+                <button class="nav-btn" onclick="showSection('setup')">⚙️ Setup Guide</button>
+            </div>
+        </header>
+
+        <div class="sidebar">
+            <h3>Quick Navigation</h3>
+            <ul>
+                <li onclick="showSection('server')">🖥️ Server Setup</li>
+                <li onclick="showSection('mongodb')">🍃 MongoDB Connection</li>
+                <li onclick="showSection('schema')">📋 Database Schema</li>
+                <li onclick="showSection('routes')">🛣️ API Routes</li>
+                <li onclick="showSection('crud')">⚡ CRUD Operations</li>
+                <li onclick="showSection('flow')">🔄 Complete Data Flow</li>
+                <li onclick="showSection('atlas')">☁️ MongoDB Atlas</li>
+                <li onclick="showSection('setup')">⚙️ Setup & Testing</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- Server Setup Section -->
+            <div id="server" class="section active">
+                <h2>🖥️ Backend Server Setup</h2>
+                
+                <h3>What is the Backend?</h3>
+                <p>The backend is the server-side of your application that:</p>
+                <ul>
+                    <li>Handles API requests from React frontend</li>
+                    <li>Connects to MongoDB database</li>
+                    <li>Processes data (CRUD operations)</li>
+                    <li>Sends responses back to frontend</li>
+                </ul>
+
+                <h3>Your Server File (index.js)</h3>
+                <pre><code>const express = require('express')
+const mongoose = require('mongoose')
+const cors = require('cors')
+const UserModel = require('./models/users.js')
+
+const app = express()
+const port = 3001
+
+app.use(cors())
+app.use(express.json())
+
+mongoose.connect("mongodb+srv://user:pass@cluster.mongodb.net/crud")
+
+// API routes here...
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`)
+})</code></pre>
+
+                <h3>Breaking It Down</h3>
+
+                <h4>1. Required Packages</h4>
+                <div class="example-card">
+                    <pre><code>const express = require('express')</code></pre>
+                    <p><strong>Express:</strong> Web framework for Node.js</p>
+                    <ul>
+                        <li>Creates server</li>
+                        <li>Handles HTTP requests (GET, POST, PUT, DELETE)</li>
+                        <li>Manages routes</li>
+                    </ul>
+                </div>
+
+                <div class="example-card">
+                    <pre><code>const mongoose = require('mongoose')</code></pre>
+                    <p><strong>Mongoose:</strong> MongoDB library for Node.js</p>
+                    <ul>
+                        <li>Connects to MongoDB</li>
+                        <li>Defines data schemas</li>
+                        <li>Performs database operations</li>
+                    </ul>
+                </div>
+
+                <div class="example-card">
+                    <pre><code>const cors = require('cors')</code></pre>
+                    <p><strong>CORS:</strong> Cross-Origin Resource Sharing</p>
+                    <ul>
+                        <li>Allows frontend (port 5173) to talk to backend (port 3001)</li>
+                        <li>Without it, browsers block requests</li>
+                        <li>Essential for development</li>
+                    </ul>
+                </div>
+
+                <div class="example-card">
+                    <pre><code>const UserModel = require('./models/users.js')</code></pre>
+                    <p><strong>User Model:</strong> Your database schema</p>
+                    <ul>
+                        <li>Defines structure of user documents</li>
+                        <li>Provides methods to interact with database</li>
+                    </ul>
+                </div>
+
+                <h4>2. App Initialization</h4>
+                <pre><code>const app = express()
+const port = 3001</code></pre>
+                <p>Creates Express application and sets port number.</p>
+
+                <h4>3. Middleware</h4>
+                <div class="info-box">
+                    <strong>💡 What is Middleware?</strong><br>
+                    Functions that run between receiving request and sending response. They can modify request/response or perform operations.
+                </div>
+
+                <pre><code>app.use(cors())          // Enable CORS
+app.use(express.json())  // Parse JSON request bodies</code></pre>
+
+                <table>
+                    <tr>
+                        <th>Middleware</th>
+                        <th>Purpose</th>
+                        <th>What It Does</th>
+                    </tr>
+                    <tr>
+                        <td><code>cors()</code></td>
+                        <td>Cross-origin requests</td>
+                        <td>Allows React (localhost:5173) to call API (localhost:3001)</td>
+                    </tr>
+                    <tr>
+                        <td><code>express.json()</code></td>
+                        <td>Parse JSON</td>
+                        <td>Converts request body to JavaScript object</td>
+                    </tr>
+                </table>
+
+                <div class="warning-box">
+                    <strong>⚠️ Without cors():</strong><br>
+                    You'll get CORS errors like: "Access to fetch has been blocked by CORS policy"
+                </div>
+
+                <h4>4. Start Server</h4>
+                <pre><code>app.listen(port, () => {
+  console.log(`Server is running on port ${port}`)
+})</code></pre>
+                <p>Starts server listening on port 3001. The callback runs when server starts successfully.</p>
+
+                <div class="success-box">
+                    <strong>✅ When server starts, you'll see:</strong><br>
+                    <code>Server is running on port 3001</code>
+                </div>
+            </div>
+
+            <!-- MongoDB Section -->
+            <div id="mongodb" class="section">
+                <h2>🍃 MongoDB Connection</h2>
+                
+                <h3>What is MongoDB?</h3>
+                <p>MongoDB is a <strong>NoSQL database</strong> that stores data as JSON-like documents.</p>
+
+                <div class="info-box">
+                    <strong>💡 SQL vs NoSQL:</strong>
+                    <ul>
+                        <li><strong>SQL:</strong> Tables with rows and columns (MySQL, PostgreSQL)</li>
+                        <li><strong>NoSQL:</strong> Collections with documents (MongoDB)</li>
+                    </ul>
+                </div>
+
+                <h3>Connection String</h3>
+                <pre><code>mongoose.connect("mongodb+srv://username:password@cluster.mongodb.net/crud")</code></pre>
+
+                <h4>Breaking Down the Connection String:</h4>
+                <table>
+                    <tr>
+                        <th>Part</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>mongodb+srv://</code></td>
+                        <td>Protocol (secure)</td>
+                        <td>Always this for Atlas</td>
+                    </tr>
+                    <tr>
+                        <td><code>username:password</code></td>
+                        <td>Database credentials</td>
+                        <td>sunagpis19_db_user:xuOf...</td>
+                    </tr>
+                    <tr>
+                        <td><code>@cluster.mongodb.net</code></td>
+                        <td>Server address</td>
+                        <td>Your Atlas cluster URL</td>
+                    </tr>
+                    <tr>
+                        <td><code>/crud</code></td>
+                        <td>Database name</td>
+                        <td>Creates "crud" database</td>
+                    </tr>
+                </table>
+
+                <h3>MongoDB Structure</h3>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>Database:</strong> crud
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="flow-step">
+                        <strong>Collection:</strong> users
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="flow-step">
+                        <strong>Document:</strong> {_id: "...", name: "John", email: "...", age: 25}
+                    </div>
+                </div>
+
+                <div class="example-card">
+                    <h4>Comparison:</h4>
+                    <table>
+                        <tr>
+                            <th>SQL Term</th>
+                            <th>MongoDB Term</th>
+                            <th>Your App</th>
+                        </tr>
+                        <tr>
+                            <td>Database</td>
+                            <td>Database</td>
+                            <td>crud</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Collection</td>
+                            <td>users</td>
+                        </tr>
+                        <tr>
+                            <td>Row</td>
+                            <td>Document</td>
+                            <td>Single user object</td>
+                        </tr>
+                        <tr>
+                            <td>Column</td>
+                            <td>Field</td>
+                            <td>name, email, age</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Schema Section -->
+            <div id="schema" class="section">
+                <h2>📋 Database Schema</h2>
+                
+                <h3>What is a Schema?</h3>
+                <p>A schema defines the <strong>structure</strong> of your documents - what fields they have and their types.</p>
+
+                <h3>Your User Schema (models/users.js)</h3>
+                <pre><code>const mongoose = require('mongoose');
+
+const UserSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  age: Number
+})
+
+const UserModel = mongoose.model("users", UserSchema)
+
+module.exports = UserModel</code></pre>
+
+                <h3>Breaking It Down</h3>
+
+                <h4>1. Define Schema</h4>
+                <pre><code>const UserSchema = new mongoose.Schema({
+  name: String,    // Field name: Data type
+  email: String,
+  age: Number
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>Field Types Available:</h4>
+                    <table>
+                        <tr>
+                            <th>Type</th>
+                            <th>JavaScript</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>String</td>
+                            <td>string</td>
+                            <td>"John Doe"</td>
+                        </tr>
+                        <tr>
+                            <td>Number</td>
+                            <td>number</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>Boolean</td>
+                            <td>boolean</td>
+                            <td>true/false</td>
+                        </tr>
+                        <tr>
+                            <td>Date</td>
+                            <td>Date object</td>
+                            <td>new Date()</td>
+                        </tr>
+                        <tr>
+                            <td>Array</td>
+                            <td>array</td>
+                            <td>[1, 2, 3]</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>2. Create Model</h4>
+                <pre><code>const UserModel = mongoose.model("users", UserSchema)</code></pre>
+                <p><strong>Parameters:</strong></p>
+                <ul>
+                    <li><code>"users"</code> - Collection name in MongoDB</li>
+                    <li><code>UserSchema</code> - Schema to use for this collection</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>💡 Model:</strong> A model is like a class - it provides an interface to interact with the database collection.
+                </div>
+
+                <h4>3. Export Model</h4>
+                <pre><code>module.exports = UserModel</code></pre>
+                <p>Makes the model available to other files (like index.js)</p>
+
+                <h3>Example Document in MongoDB</h3>
+                <pre><code>{
+  "_id": "507f1f77bcf86cd799439011",  // Auto-generated by MongoDB
+  "name": "John Doe",
+  "email": "john@example.com",
+  "age": 25,
+  "__v": 0  // Version key (managed by Mongoose)
+}</code></pre>
+
+                <div class="tip-box">
+                    <strong>🎯 Schema Best Practices:</strong>
+                    <ul>
+                        <li>Add validation: <code>name: { type: String, required: true }</code></li>
+                        <li>Set defaults: <code>age: { type: Number, default: 0 }</code></li>
+                        <li>Add timestamps: <code>{ timestamps: true }</code> adds createdAt/updatedAt</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Routes Section -->
+            <div id="routes" class="section">
+                <h2>🛣️ API Routes</h2>
+                
+                <p>Routes define the <strong>endpoints</strong> your frontend can call to perform operations.</p>
+
+                <h3>Route Structure</h3>
+                <pre><code>app.METHOD(PATH, HANDLER)
+
+// Examples:
+app.get('/', (req, res) => { ... })
+app.post('/createuser', (req, res) => { ... })
+app.put('/updateuser/:id', (req, res) => { ... })
+app.delete('/deleteuser/:id', (req, res) => { ... })</code></pre>
+
+                <table>
+                    <tr>
+                        <th>Part</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>METHOD</code></td>
+                        <td>HTTP method</td>
+                        <td>get, post, put, delete</td>
+                    </tr>
+                    <tr>
+                        <td><code>PATH</code></td>
+                        <td>URL endpoint</td>
+                        <td>'/', '/createuser'</td>
+                    </tr>
+                    <tr>
+                        <td><code>HANDLER</code></td>
+                        <td>Function to run</td>
+                        <td>(req, res) => { ... }</td>
+                    </tr>
+                </table>
+
+                <h3>Request & Response Objects</h3>
+                
+                <h4>Request (req)</h4>
+                <div class="example-card">
+                    <ul>
+                        <li><code>req.params</code> - URL parameters (/user/:id)</li>
+                        <li><code>req.body</code> - Request body (POST/PUT data)</li>
+                        <li><code>req.query</code> - Query strings (?name=John)</li>
+                    </ul>
+                    <pre><code>// URL: /updateuser/123
+app.put('/updateuser/:id', (req, res) => {
+  const id = req.params.id;  // "123"
+  const data = req.body;     // {name: "John", ...}
+})</code></pre>
+                </div>
+
+                <h4>Response (res)</h4>
+                <div class="example-card">
+                    <ul>
+                        <li><code>res.json(data)</code> - Send JSON response</li>
+                        <li><code>res.status(code)</code> - Set status code</li>
+                        <li><code>res.send(text)</code> - Send text response</li>
+                    </ul>
+                    <pre><code>res.json({ message: "Success", user: userData })
+res.status(404).json({ error: "Not found" })</code></pre>
+                </div>
+
+                <h3>Your 5 API Routes</h3>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Purpose</th>
+                        <th>Frontend Call</th>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/</td>
+                        <td>Get all users</td>
+                        <td>axios.get("http://localhost:3001")</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/getuser/:id</td>
+                        <td>Get one user</td>
+                        <td>axios.get("/getuser/123")</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/createuser</td>
+                        <td>Create user</td>
+                        <td>axios.post("/createuser", data)</td>
+                    </tr>
+                    <tr>
+                        <td>PUT</td>
+                        <td>/updateuser/:id</td>
+                        <td>Update user</td>
+                        <td>axios.put("/updateuser/123", data)</td>
+                    </tr>
+                    <tr>
+                        <td>DELETE</td>
+                        <td>/deleteuser/:id</td>
+                        <td>Delete user</td>
+                        <td>axios.delete("/deleteuser/123")</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- CRUD Section -->
+            <div id="crud" class="section">
+                <h2>⚡ CRUD Operations Explained</h2>
+                
+                <h3>1. READ - Get All Users</h3>
+                <pre><code>app.get('/', (req, res) => {
+  UserModel.find({})
+    .then(users => res.json(users))
+    .catch(err => res.json(err))
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>How It Works:</h4>
+                    <ol>
+                        <li>React calls: <code>axios.get("http://localhost:3001")</code></li>
+                        <li>Server receives GET request at '/' route</li>
+                        <li><code>UserModel.find({})</code> queries MongoDB for all users</li>
+                        <li>Empty object <code>{}</code> means "no filter, get all"</li>
+                        <li><code>.then(users => ...)</code> receives array of user documents</li>
+                        <li><code>res.json(users)</code> sends array back to React</li>
+                        <li>React updates state: <code>setUsers(result.data)</code></li>
+                    </ol>
+                </div>
+
+                <div class="info-box">
+                    <strong>MongoDB Query Result:</strong>
+                    <pre><code>[
+  { _id: "abc123", name: "John", email: "john@...", age: 25 },
+  { _id: "def456", name: "Jane", email: "jane@...", age: 30 }
+]</code></pre>
+                </div>
+
+                <h3>2. READ - Get Single User</h3>
+                <pre><code>app.get('/getuser/:id', (req, res) => {
+  const id = req.params.id;
+  UserModel.findById({_id: id})
+    .then(users => res.json(users))
+    .catch(err => res.json(err))
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>How It Works:</h4>
+                    <ol>
+                        <li>React calls: <code>axios.get("/getuser/abc123")</code></li>
+                        <li>Server extracts ID: <code>req.params.id</code> = "abc123"</li>
+                        <li><code>UserModel.findById({_id: id})</code> finds user with that ID</li>
+                        <li>Returns single user document (not array)</li>
+                        <li>React receives: <code>{ name: "John", email: "...", age: 25 }</code></li>
+                        <li>Pre-fills form fields with this data</li>
+                    </ol>
+                </div>
+
+                <h3>3. CREATE - Add New User</h3>
+                <pre><code>app.post('/createuser', (req, res) => {
+  UserModel.create(req.body)
+    .then(users => res.json(users))
+    .catch(err => res.json(err))
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>How It Works:</h4>
+                    <ol>
+                        <li>React submits form: <code>axios.post("/createuser", {name, email, age})</code></li>
+                        <li>Server receives data in <code>req.body</code>:
+                            <pre><code>{ name: "John", email: "john@...", age: 25 }</code></pre>
+                        </li>
+                        <li><code>UserModel.create(req.body)</code> inserts into MongoDB</li>
+                        <li>MongoDB auto-generates <code>_id</code> field</li>
+                        <li>Returns created document with ID</li>
+                        <li>React receives success response</li>
+                        <li>Redirects to home: <code>navigate('/')</code></li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Validation:</strong> In production, always validate req.body before inserting!
+                    <pre><code>if (!req.body.name || !req.body.email) {
+  return res.status(400).json({ error: "Missing fields" })
+}</code></pre>
+                </div>
+
+                <h3>4. UPDATE - Edit User</h3>
+                <pre><code>app.put('/updateuser/:id', (req, res) => {
+  const id = req.params.id;
+  UserModel.findByIdAndUpdate({_id: id}, {
+    name: req.body.name,
+    email: req.body.email,
+    age: req.body.age
+  })
+    .then(users => res.json(users))
+    .catch(err => res.json(err))
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>How It Works:</h4>
+                    <ol>
+                        <li>React submits: <code>axios.put("/updateuser/abc123", {name, email, age})</code></li>
+                        <li>Server gets ID from URL: <code>req.params.id</code></li>
+                        <li>Gets new data from body: <code>req.body</code></li>
+                        <li><code>findByIdAndUpdate</code> finds user by ID and updates fields</li>
+                        <li>Returns updated document (or original, depending on options)</li>
+                        <li>React redirects to home to show changes</li>
+                    </ol>
+                </div>
+
+                <div class="tip-box">
+                    <strong>🎯 Better Update:</strong> Return new document with <code>{ new: true }</code>
+                    <pre><code>UserModel.findByIdAndUpdate(
+  {_id: id}, 
+  req.body,
+  { new: true }  // Returns updated document
+)</code></pre>
+                </div>
+
+                <h3>5. DELETE - Remove User</h3>
+                <pre><code>app.delete('/deleteuser/:id', (req, res) => {
+  const id = req.params.id;
+  UserModel.findByIdAndDelete({_id: id})
+    .then(result => res.json(result))
+    .catch(err => res.json(err))
+})</code></pre>
+
+                <div class="example-card">
+                    <h4>How It Works:</h4>
+                    <ol>
+                        <li>React clicks delete: <code>axios.delete("/deleteuser/abc123")</code></li>
+                        <li>Server extracts ID from URL</li>
+                        <li><code>findByIdAndDelete</code> removes document from MongoDB</li>
+                        <li>Returns deleted document (for confirmation)</li>
+                        <li>React updates UI: filters out deleted user from state</li>
+                        <li>Table re-renders without that user</li>
+                    </ol>
+                </div>
+
+                <h3>Mongoose Methods Summary</h3>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                        <th>Returns</th>
+                    </tr>
+                    <tr>
+                        <td><code>find({})</code></td>
+                        <td>Find all documents</td>
+                        <td>Array of documents</td>
+                    </tr>
+                    <tr>
+                        <td><code>findById(id)</code></td>
+                        <td>Find one by ID</td>
+                        <td>Single document</td>
+                    </tr>
+                    <tr>
+                        <td><code>create(data)</code></td>
+                        <td>Insert new document</td>
+                        <td>Created document</td>
+                    </tr>
+                    <tr>
+                        <td><code>findByIdAndUpdate(id, data)</code></td>
+                        <td>Update by ID</td>
+                        <td>Updated document</td>
+                    </tr>
+                    <tr>
+                        <td><code>findByIdAndDelete(id)</code></td>
+                        <td>Delete by ID</td>
+                        <td>Deleted document</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Data Flow Section -->
+            <div id="flow" class="section">
+                <h2>🔄 Complete Data Flow</h2>
+                
+                <h3>Full Journey: Creating a New User</h3>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <span class="step-number">1</span>
+                        <strong>User Action:</strong> Clicks "Add +" button on home page
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">2</span>
+                        <strong>React Router:</strong> &lt;Link to="/create"&gt; navigates to /create
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">3</span>
+                        <strong>Component Renders:</strong> CreateUser.jsx displays form
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">4</span>
+                        <strong>User Input:</strong> Types name, email, age (onChange updates state)
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">5</span>
+                        <strong>Form Submit:</strong> User clicks "Submit" button
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">6</span>
+                        <strong>Submit Handler:</strong> e.preventDefault() stops page reload
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">7</span>
+                        <strong>Axios POST:</strong> axios.post("http://localhost:3001/createuser", {name, email, age})
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">8</span>
+                        <strong>Server Receives:</strong> Express route app.post('/createuser', ...) handles request
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">9</span>
+                        <strong>Middleware:</strong> express.json() parses body into JavaScript object
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">10</span>
+                        <strong>Database Insert:</strong> UserModel.create(req.body) inserts into MongoDB
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">11</span>
+                        <strong>MongoDB:</strong> Validates schema, generates _id, saves document
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">12</span>
+                        <strong>Promise Resolves:</strong> .then(users => res.json(users))
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">13</span>
+                        <strong>Response Sent:</strong> Server sends JSON: {_id: "...", name: "John", ...}
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">14</span>
+                        <strong>React Receives:</strong> .then(result => console.log(result))
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">15</span>
+                        <strong>Navigation:</strong> navigate('/') redirects to home page
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">16</span>
+                        <strong>Users.jsx Loads:</strong> useEffect runs on mount
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">17</span>
+                        <strong>Fetch Users:</strong> axios.get("http://localhost:3001")
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">18</span>
+                        <strong>Server Query:</strong> UserModel.find({}) gets all users
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">19</span>
+                        <strong>Update State:</strong> setUsers(result.data) updates users array
+                    </div>
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <span class="step-number">20</span>
+                        <strong>UI Updates:</strong> Table re-renders with new user included! ✅
+                    </div>
+                </div>
+
+                <h3>Data Flow for Other Operations</h3>
+                
+                <h4>Update Flow:</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Update" → Navigate to /update/:id</li>
+                        <li>useParams gets ID from URL</li>
+                        <li>useEffect fetches user data: GET /getuser/:id</li>
+                        <li>Pre-fill form with fetched data</li>
+                        <li>User edits and submits</li>
+                        <li>PUT /updateuser/:id with new data</li>
+                        <li>MongoDB updates document</li>
+                        <li>Redirect to home, fetch updated list</li>
+                    </ol>
+                </div>
+
+                <h4>Delete Flow:</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Delete" button</li>
+                        <li>onClick handler: handleDelete(user._id)</li>
+                        <li>DELETE /deleteuser/:id</li>
+                        <li>MongoDB removes document</li>
+                        <li>React filters deleted user from state</li>
+                        <li>Table re-renders without user (no page reload!)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- MongoDB Atlas Section -->
+            <div id="atlas" class="section">
+                <h2>☁️ MongoDB Atlas Setup</h2>
+                
+                <h3>What is MongoDB Atlas?</h3>
+                <p>MongoDB Atlas is a <strong>cloud-hosted MongoDB database</strong> (Database as a Service).</p>
+
+                <div class="info-box">
+                    <strong>💡 Why Atlas?</strong>
+                    <ul>
+                        <li>✅ No need to install MongoDB locally</li>
+                        <li>✅ Free tier available (512MB storage)</li>
+                        <li>✅ Automatic backups</li>
+                        <li>✅ Accessible from anywhere</li>
+                        <li>✅ Production-ready</li>
+                    </ul>
+                </div>
+
+                <h3>Step-by-Step Setup Guide</h3>
+                
+                <h4>Step 1: Create Account</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Go to <a href="https://www.mongodb.com/cloud/atlas" target="_blank">mongodb.com/cloud/atlas</a></li>
+                        <li>Click "Try Free" or "Sign Up"</li>
+                        <li>Create account with email or Google</li>
+                        <li>Verify email address</li>
+                    </ol>
+                </div>
+
+                <h4>Step 2: Create Cluster</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Choose deployment: <strong>Shared (Free)</strong></li>
+                        <li>Cloud Provider: AWS / Google Cloud / Azure</li>
+                        <li>Region: Choose closest to you</li>
+                        <li>Cluster Tier: <strong>M0 Sandbox (Free)</strong></li>
+                        <li>Cluster Name: Leave default or customize</li>
+                        <li>Click "Create Cluster" (takes 3-5 minutes)</li>
+                    </ol>
+                </div>
+
+                <h4>Step 3: Create Database User</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Database Access" in left sidebar</li>
+                        <li>Click "Add New Database User"</li>
+                        <li>Authentication Method: <strong>Password</strong></li>
+                        <li>Username: e.g., <code>myapp_user</code></li>
+                        <li>Password: Click "Autogenerate" or create your own</li>
+                        <li><strong>⚠️ Save password somewhere safe!</strong></li>
+                        <li>Database User Privileges: <strong>Read and write to any database</strong></li>
+                        <li>Click "Add User"</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> Save your password! You can't view it again later.
+                </div>
+
+                <h4>Step 4: Whitelist IP Address</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Network Access" in left sidebar</li>
+                        <li>Click "Add IP Address"</li>
+                        <li><strong>For Development:</strong> Click "Allow Access from Anywhere"</li>
+                        <li>This adds <code>0.0.0.0/0</code> (all IPs)</li>
+                        <li>Click "Confirm"</li>
+                        <li>Wait 2-3 minutes for changes to apply</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Production:</strong> In production, only whitelist your server's specific IP address for security!
+                </div>
+
+                <h4>Step 5: Get Connection String</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Database" in left sidebar</li>
+                        <li>Click "Connect" button on your cluster</li>
+                        <li>Choose "Connect your application"</li>
+                        <li>Driver: <strong>Node.js</strong></li>
+                        <li>Version: Latest</li>
+                        <li>Copy the connection string:
+                            <pre><code>mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority</code></pre>
+                        </li>
+                    </ol>
+                </div>
+
+                <h4>Step 6: Update Your Code</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Replace <code>&lt;username&gt;</code> with your database username</li>
+                        <li>Replace <code>&lt;password&gt;</code> with your actual password</li>
+                        <li>Add database name: <code>/crud</code> before the query parameters</li>
+                    </ol>
+                    <pre><code>// Before:
+mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster0.xxxxx.mongodb.net/?retryWrites=true
+
+// After:
+mongoose.connect("mongodb+srv://myapp_user:MyPass123@cluster0.xxxxx.mongodb.net/crud?retryWrites=true")</code></pre>
+                </div>
+
+                <h4>Step 7: Test Connection</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Start your server: <code>npm start</code></li>
+                        <li>Check terminal for: "Server is running on port 3001"</li>
+                        <li>No MongoDB connection errors = success! ✅</li>
+                        <li>Test with Postman or your React app</li>
+                    </ol>
+                </div>
+
+                <h3>Viewing Your Data</h3>
+                <div class="example-card">
+                    <ol>
+                        <li>In Atlas dashboard, click "Browse Collections"</li>
+                        <li>You'll see your database: <strong>crud</strong></li>
+                        <li>Inside: <strong>users</strong> collection</li>
+                        <li>View, edit, or delete documents directly here</li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ Your Database is Live!</strong><br>
+                    You can now create, read, update, and delete users from anywhere with internet access.
+                </div>
+            </div>
+
+            <!-- Setup Section -->
+            <div id="setup" class="section">
+                <h2>⚙️ Complete Setup & Testing Guide</h2>
+                
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li>✅ Node.js installed (v14 or higher)</li>
+                    <li>✅ npm or yarn package manager</li>
+                    <li>✅ Code editor (VS Code recommended)</li>
+                    <li>✅ MongoDB Atlas account setup</li>
+                </ul>
+
+                <h3>Backend Setup</h3>
+                
+                <h4>1. Navigate to Server Folder</h4>
+                <pre><code>cd mern/server</code></pre>
+
+                <h4>2. Install Dependencies</h4>
+                <pre><code>npm install</code></pre>
+                <p>This installs:</p>
+                <ul>
+                    <li><code>express</code> - Web framework</li>
+                    <li><code>mongoose</code> - MongoDB library</li>
+                    <li><code>cors</code> - Cross-origin requests</li>
+                    <li><code>nodemon</code> - Auto-restart on file changes</li>
+                </ul>
+
+                <h4>3. Configure package.json</h4>
+                <pre><code>{
+  "name": "server",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.0.1",
+    "cors": "^2.8.5",
+    "nodemon": "^3.1.11"
+  }
+}</code></pre>
+
+                <h4>4. Start Server</h4>
+                <pre><code>npm start</code></pre>
+                <div class="success-box">
+                    <strong>✅ Success Message:</strong><br>
+                    <code>Server is running on port 3001</code>
+                </div>
+
+                <h3>Frontend Setup</h3>
+                
+                <h4>1. Open New Terminal</h4>
+                <p>(Keep server terminal running)</p>
+
+                <h4>2. Navigate to Client Folder</h4>
+                <pre><code>cd mern/client</code></pre>
+
+                <h4>3. Install Dependencies</h4>
+                <pre><code>npm install</code></pre>
+                <p>This installs:</p>
+                <ul>
+                    <li><code>react</code> - UI library</li>
+                    <li><code>react-router-dom</code> - Routing</li>
+                    <li><code>axios</code> - HTTP client</li>
+                    <li><code>bootstrap</code> - CSS framework</li>
+                </ul>
+
+                <h4>4. Start Development Server</h4>
+                <pre><code>npm run dev</code></pre>
+                <div class="success-box">
+                    <strong>✅ Success Message:</strong><br>
+                    <code>Local: http://localhost:5173</code>
+                </div>
+
+                <h3>Testing Your Application</h3>
+                
+                <h4>1. Open Browser</h4>
+                <div class="example-card">
+                    <p>Navigate to: <code>http://localhost:5173</code></p>
+                    <p>You should see an empty table with "Add +" button</p>
+                </div>
+
+                <h4>2. Test Create (POST)</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Add +" button</li>
+                        <li>Fill in name, email, age</li>
+                        <li>Click "Submit"</li>
+                        <li>Should redirect to home page</li>
+                        <li>New user appears in table ✅</li>
+                    </ol>
+                </div>
+
+                <h4>3. Test Read (GET)</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Refresh page</li>
+                        <li>Users should still appear (data persisted in MongoDB)</li>
+                        <li>Check browser console (F12) for any errors</li>
+                    </ol>
+                </div>
+
+                <h4>4. Test Update (PUT)</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Update" button on any user</li>
+                        <li>Form should pre-fill with current data</li>
+                        <li>Change some values</li>
+                        <li>Click "Update"</li>
+                        <li>Redirects to home</li>
+                        <li>Changes appear in table ✅</li>
+                    </ol>
+                </div>
+
+                <h4>5. Test Delete (DELETE)</h4>
+                <div class="example-card">
+                    <ol>
+                        <li>Click "Delete" button on any user</li>
+                        <li>User should disappear from table immediately</li>
+                        <li>No page reload ✅</li>
+                    </ol>
+                </div>
+
+                <h3>Troubleshooting</h3>
+                
+                <h4>Problem: CORS Error</h4>
+                <div class="warning-box">
+                    <strong>Error:</strong> "Access to fetch has been blocked by CORS policy"<br><br>
+                    <strong>Solution:</strong> Add <code>app.use(cors())</code> in server index.js
+                </div>
+
+                <h4>Problem: Cannot Connect to MongoDB</h4>
+                <div class="warning-box">
+                    <strong>Error:</strong> "MongoNetworkError"<br><br>
+                    <strong>Solutions:</strong>
+                    <ul>
+                        <li>Check MongoDB Atlas IP whitelist (add 0.0.0.0/0)</li>
+                        <li>Verify username/password in connection string</li>
+                        <li>Ensure cluster is active (not paused)</li>
+                    </ul>
+                </div>
+
+                <h4>Problem: Port Already in Use</h4>
+                <div class="warning-box">
+                    <strong>Error:</strong> "EADDRINUSE"<br><br>
+                    <strong>Solution:</strong> 
+                    <ul>
+                        <li>Change port in server index.js: <code>const port = 3002</code></li>
+                        <li>Update frontend API calls to use new port</li>
+                    </ul>
+                </div>
+
+                <h4>Problem: React Component Not Updating</h4>
+                <div class="warning-box">
+                    <strong>Issue:</strong> Data changes but UI doesn't update<br><br>
+                    <strong>Solution:</strong> Check that you're using state setters:
+                    <pre><code>// ❌ Wrong:
+users.push(newUser);
+
+// ✅ Correct:
+setUsers([...users, newUser]);</code></pre>
+                </div>
+
+                <h3>Development Workflow</h3>
+                <div class="example-card">
+                    <h4>Daily Workflow:</h4>
+                    <ol>
+                        <li>Open VS Code in project folder</li>
+                        <li>Open 2 terminals:
+                            <ul>
+                                <li>Terminal 1: <code>cd server && npm start</code></li>
+                                <li>Terminal 2: <code>cd client && npm run dev</code></li>
+                            </ul>
+                        </li>
+                        <li>Make code changes (auto-reload with nodemon/vite)</li>
+                        <li>Test in browser</li>
+                        <li>Check MongoDB Atlas to verify data changes</li>
+                    </ol>
+                </div>
+
+                <h3>Testing with Postman (Optional)</h3>
+                <div class="tip-box">
+                    <p>Test your API directly without the React app:</p>
+                    <ol>
+                        <li>Download Postman (postman.com)</li>
+                        <li>Create requests:
+                            <ul>
+                                <li>GET http://localhost:3001/</li>
+                                <li>POST http://localhost:3001/createuser<br>
+                                    Body (JSON): <code>{"name":"Test","email":"test@test.com","age":25}</code>
+                                </li>
+                                <li>PUT http://localhost:3001/updateuser/:id</li>
+                                <li>DELETE http://localhost:3001/deleteuser/:id</li>
+                            </ul>
+                        </li>
+                        <li>Verify responses</li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <h4>🎉 Congratulations!</h4>
+                    <p>You now have a fully functional MERN stack application with:</p>
+                    <ul>
+                        <li>✅ React frontend with routing</li>
+                        <li>✅ Express backend with REST API</li>
+                        <li>✅ MongoDB database (cloud-hosted)</li>
+                        <li>✅ Full CRUD functionality</li>
+                        <li>✅ Real-time UI updates</li>
+                    </ul>
+                    <p style="margin-top: 20px;"><strong>Next Steps:</strong></p>
+                    <ul>
+                        <li>Add form validation</li>
+                        <li>Improve error handling</li>
+                        <li>Add user authentication</li>
+                        <li>Deploy to production (Vercel + MongoDB Atlas)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        document.querySelectorAll('.sidebar li').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar li').forEach(li => {
+                    li.style.color = '#333';
+                });
+                this.style.color = '#11998e';
+            });
+        });
+    </script>
+</body>
+</html>
