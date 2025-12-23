@@ -6,7 +6,7 @@ const app = express()
 const port = 3001
 app.use(cors())
 app.use(express.json())
-mongoose.connect("mongodb+srv://sunagpis19_db_user:xuOfKwLdA5slo3JH@cluster0.plvzrt4.mongodb.net/crud?appName=Cluster0")
+mongoose.connect("mongodb+srv://<user_name>:<password>@cluster0.plvzrt4.mongodb.net/crud?appName=Cluster0")
 
 // Get all users
 app.get('/', (req, res) => {
@@ -52,4 +52,5 @@ app.delete('/deleteuser/:id', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
+
 })
